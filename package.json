@@ -1,0 +1,11 @@
+{
+  "name": "com.gilzoide.runtime-preset",
+  "displayName": "Runtime Preset",
+  "version": "1.0.0",
+  "description": "Preset for components that can be applied at runtime",
+  "homepage": "https://github.com/gilzoide/unity-runtime-preset",
+  "license": "Unlicense",
+  "author": {
+    "name": "Gil Barbosa Reis"
+  }
+}
