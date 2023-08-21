@@ -14,6 +14,7 @@ namespace Gilzoide.RuntimePreset.Editor
 
         private SerializedProperty targetTypeProperty;
         private SerializedProperty jsonProperty;
+        private SerializedProperty objectReferencesProperty;
 
         private Component _component;
         private GameObject _componentHolder;
@@ -25,9 +26,12 @@ namespace Gilzoide.RuntimePreset.Editor
         {
             targetTypeProperty = serializedObject.FindProperty("_targetType");
             jsonProperty = serializedObject.FindProperty("_valuesJson");
+            objectReferencesProperty = serializedObject.FindProperty("_objectReferences");
 
-            _componentHolder = new GameObject(nameof(RuntimePresetEditor));
-            _componentHolder.hideFlags = HideFlags.HideAndDontSave;
+            _componentHolder = new GameObject(nameof(RuntimePresetEditor))
+            {
+                hideFlags = HideFlags.HideAndDontSave
+            };
 
             _includedProperties = new HashSet<string>();
         }
@@ -102,6 +106,7 @@ namespace Gilzoide.RuntimePreset.Editor
             _preset.GetIncludedPropertySet(_includedProperties);
             if (EditorGUI.EndChangeCheck() || !_includedProperties.SetEquals(runtimePreset.PropertyValues.Keys))
             {
+                objectReferencesProperty.ClearArray();
                 jsonProperty.stringValue = GetModifiedValuesJson(_preset, _component);
             }
 
@@ -123,6 +128,22 @@ namespace Gilzoide.RuntimePreset.Editor
                     case SerializedPropertyType.Integer: values.SetNested(property.propertyPath, property.intValue); break;
                     case SerializedPropertyType.Float: values.SetNested(property.propertyPath, property.doubleValue); break;
                     case SerializedPropertyType.String: values.SetNested(property.propertyPath, property.stringValue); break;
+                    case SerializedPropertyType.ObjectReference:
+                        if (property.objectReferenceValue != null)
+                        {
+                            int index = objectReferencesProperty.arraySize;
+                            objectReferencesProperty.InsertArrayElementAtIndex(index);
+                            objectReferencesProperty.GetArrayElementAtIndex(index).objectReferenceValue = property.objectReferenceValue;
+                            values.SetNested(property.propertyPath, index);
+                        }
+                        else
+                        {
+                            values.SetNested(property.propertyPath, -1);
+                        }
+                        break;
+                    default:
+                        Debug.LogWarning($"[{nameof(RuntimePreset)}] Type {property.propertyType} is not supported (path: {property.propertyPath})");
+                        break;
                 }
             }
 

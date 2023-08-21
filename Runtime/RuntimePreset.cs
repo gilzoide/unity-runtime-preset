@@ -1,10 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Gilzoide.RuntimePreset
 {
@@ -12,8 +11,11 @@ namespace Gilzoide.RuntimePreset
     {
         [SerializeField] private string _targetType;
         [SerializeField] private string _valuesJson;
-        private Dictionary<string, object> _propertyValues;
+        [SerializeField] private List<Object> _objectReferences = new List<Object>();
         
+        private Dictionary<string, object> _propertyValues;
+        private JsonSerializerSettings _jsonSettings;
+
         public Type TargetType
         {
             get
@@ -63,7 +65,7 @@ namespace Gilzoide.RuntimePreset
         {
             if (CanBeAppliedTo(obj))
             {
-                JsonUtility.FromJsonOverwrite(_valuesJson, obj);
+                JsonConvert.PopulateObject(_valuesJson, obj, _jsonSettings);
                 return true;
             }
             return false;
@@ -75,12 +77,17 @@ namespace Gilzoide.RuntimePreset
         {
             if (_propertyValues != null)
             {
-                _valuesJson = JsonConvert.SerializeObject(_propertyValues);
+                _valuesJson = JsonConvert.SerializeObject(_propertyValues, _jsonSettings);
             }
         }
 
         public void OnAfterDeserialize()
         {
+            _jsonSettings = new JsonSerializerSettings
+            {
+                Converters = new[] { new JsonObjectConverter(_objectReferences) },
+                NullValueHandling = NullValueHandling.Include,
+            };
         }
 
         #endregion
@@ -100,7 +107,7 @@ namespace Gilzoide.RuntimePreset
 
             try
             {
-                _propertyValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(_valuesJson);
+                _propertyValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(_valuesJson, _jsonSettings);
             }
             catch (Exception ex)
             {
@@ -112,7 +119,6 @@ namespace Gilzoide.RuntimePreset
                 {
                     _propertyValues = new Dictionary<string, object>();
                 }
-
             }
         }
 

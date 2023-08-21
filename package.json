@@ -8,5 +8,8 @@
   "author": {
     "name": "Gil Barbosa Reis"
   },
-  "unity": "2018.1"
+  "unity": "2018.1",
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.0.0"
+  }
 }
