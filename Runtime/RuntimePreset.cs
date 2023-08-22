@@ -9,11 +9,11 @@ namespace Gilzoide.RuntimePreset
 {
     public class RuntimePreset : ScriptableObject, ISerializationCallbackReceiver
     {
-        [SerializeField] private string _targetType;
-        [SerializeField] private string _valuesJson;
+        [SerializeField] private string _targetType = "";
+        [SerializeField] private string _valuesJson = "{}";
+        [SerializeField] private string _objectsJson = "{}";
         [SerializeField] private List<Object> _objectReferences = new List<Object>();
         
-        private Dictionary<string, object> _propertyValues;
         private JsonSerializerSettings _jsonSettings;
 
         public Type TargetType
@@ -44,18 +44,6 @@ namespace Gilzoide.RuntimePreset
         }
 #endif
 
-        public IReadOnlyDictionary<string, object> PropertyValues => GetPropertyValues();
-
-        public object this[string property]
-        {
-            get => PropertyValues.TryGetValue(property, out object value) ? value : null;
-            set
-            {
-                LoadPropertyValuesIfNeeded();
-                _propertyValues[property] = value;
-            }
-        }
-
         public bool CanBeAppliedTo(Component obj)
         {
             return TargetType.IsAssignableFrom(obj.GetType());
@@ -65,7 +53,8 @@ namespace Gilzoide.RuntimePreset
         {
             if (CanBeAppliedTo(obj))
             {
-                JsonConvert.PopulateObject(_valuesJson, obj, _jsonSettings);
+                JsonUtility.FromJsonOverwrite(_valuesJson, obj);
+                JsonConvert.PopulateObject(_objectsJson, obj, _jsonSettings);
                 return true;
             }
             return false;
@@ -75,10 +64,6 @@ namespace Gilzoide.RuntimePreset
 
         public void OnBeforeSerialize()
         {
-            if (_propertyValues != null)
-            {
-                _valuesJson = JsonConvert.SerializeObject(_propertyValues, _jsonSettings);
-            }
         }
 
         public void OnAfterDeserialize()
@@ -92,40 +77,26 @@ namespace Gilzoide.RuntimePreset
 
         #endregion
 
-        private Dictionary<string, object> GetPropertyValues()
+#if UNITY_EDITOR
+        void OnValidate()
         {
-            LoadPropertyValuesIfNeeded();
-            return _propertyValues;
-        }
-
-        private void LoadPropertyValuesIfNeeded()
-        {
-            if (_propertyValues != null)
+            try
             {
-                return;
+                var _ = JsonConvert.DeserializeObject<Dictionary<string, object>>(_valuesJson);
+            }
+            catch (Exception)
+            {
+                _valuesJson = "{}";
             }
 
             try
             {
-                _propertyValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(_valuesJson, _jsonSettings);
+                var _ = JsonConvert.DeserializeObject<Dictionary<string, object>>(_objectsJson);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Debug.LogException(ex);
+                _objectsJson = "{}";
             }
-            finally
-            {
-                if (_propertyValues == null)
-                {
-                    _propertyValues = new Dictionary<string, object>();
-                }
-            }
-        }
-
-#if UNITY_EDITOR
-        private void OnValidate()
-        {
-            _propertyValues = null;
         }
 #endif
     }
