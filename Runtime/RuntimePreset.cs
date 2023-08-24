@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
@@ -34,7 +35,7 @@ namespace Gilzoide.RuntimePreset
         {
             get
             {
-                string[] guid = AssetDatabase.FindAssets($"t:MonoScript {_targetType}");
+                string[] guid = AssetDatabase.FindAssets($"t:MonoScript {_targetType.Split('.').Last()}");
                 if (guid.Length != 1)
                 {
                     return null;
@@ -46,11 +47,23 @@ namespace Gilzoide.RuntimePreset
 
         public bool CanBeAppliedTo(Object obj)
         {
-            return TargetType?.IsAssignableFrom(obj.GetType()) ?? false;
+            return obj != null
+                && TargetType is Type targetType
+                && targetType.IsAssignableFrom(obj.GetType());
         }
 
-        public bool ApplyTo(Object obj)
+        public void ApplyTo(Object obj)
         {
+            TryApplyTo(obj);
+        }
+
+        public bool TryApplyTo(Object obj)
+        {
+            Type targetType = TargetType;
+            if (targetType != null && obj is GameObject gameObject && targetType.IsSubclassOf(typeof(Component)))
+            {
+                obj = gameObject.GetComponent(targetType);
+            }
             if (CanBeAppliedTo(obj))
             {
                 JsonUtility.FromJsonOverwrite(_valuesJson, obj);

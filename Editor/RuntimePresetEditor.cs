@@ -74,7 +74,8 @@ namespace Gilzoide.RuntimePreset.Editor
                 targetTypeProperty.stringValue = newMonoScript != null ? newMonoScript.GetClass().FullName : "";
                 if (newMonoScript == null)
                 {
-                    valuesJsonProperty.stringValue = "";
+                    objectsJsonProperty.stringValue = "{}";
+                    valuesJsonProperty.stringValue = "{}";
                 }
                 DestroyImmediate(_preset);
                 DestroyImmediate(_presetEditor);
@@ -92,12 +93,12 @@ namespace Gilzoide.RuntimePreset.Editor
             if (_presetTemporaryObject == null && newMonoScript.GetClass().IsSubclassOf(typeof(Component)))
             {
                 _presetTemporaryObject = _componentHolder.AddComponent(newMonoScript.GetClass());
-                Debug.Assert(runtimePreset.ApplyTo(_presetTemporaryObject), "FIXME!!!");
+                Debug.Assert(runtimePreset.TryApplyTo(_presetTemporaryObject), "FIXME!!!");
             }
             if (_presetTemporaryObject == null && newMonoScript.GetClass().IsSubclassOf(typeof(ScriptableObject)))
             {
                 _presetTemporaryObject = CreateInstance(newMonoScript.GetClass());
-                Debug.Assert(runtimePreset.ApplyTo(_presetTemporaryObject), "FIXME!!!");
+                Debug.Assert(runtimePreset.TryApplyTo(_presetTemporaryObject), "FIXME!!!");
             }
             if (_preset == null)
             {
