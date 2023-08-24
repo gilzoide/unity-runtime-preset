@@ -44,12 +44,12 @@ namespace Gilzoide.RuntimePreset
         }
 #endif
 
-        public bool CanBeAppliedTo(Component obj)
+        public bool CanBeAppliedTo(Object obj)
         {
-            return TargetType.IsAssignableFrom(obj.GetType());
+            return TargetType?.IsAssignableFrom(obj.GetType()) ?? false;
         }
 
-        public bool ApplyTo(Component obj)
+        public bool ApplyTo(Object obj)
         {
             if (CanBeAppliedTo(obj))
             {

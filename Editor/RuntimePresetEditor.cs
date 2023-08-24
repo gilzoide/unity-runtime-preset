@@ -17,7 +17,7 @@ namespace Gilzoide.RuntimePreset.Editor
         private SerializedProperty objectsJsonProperty;
         private SerializedProperty objectReferencesProperty;
 
-        private Component _component;
+        private Object _presetTemporaryObject;
         private GameObject _componentHolder;
         private Preset _preset;
         private UnityEditor.Editor _presetEditor;
@@ -43,6 +43,7 @@ namespace Gilzoide.RuntimePreset.Editor
             DestroyImmediate(_preset);
             DestroyImmediate(_presetEditor);
             DestroyImmediate(_componentHolder);
+            DestroyImmediate(_presetTemporaryObject);
             _includedProperties = null;
         }
 
@@ -63,7 +64,7 @@ namespace Gilzoide.RuntimePreset.Editor
             MonoScript monoScript = runtimePreset.TargetMonoScript;
 
             MonoScript newMonoScript = (MonoScript) EditorGUILayout.ObjectField(_targetTypeContent, monoScript, typeof(MonoScript), false);
-            if (newMonoScript && !newMonoScript.GetClass().IsSubclassOf(typeof(MonoBehaviour)))
+            if (newMonoScript && !newMonoScript.GetClass().IsSubclassOf(typeof(Object)))
             {
                 return;
             }
@@ -77,7 +78,7 @@ namespace Gilzoide.RuntimePreset.Editor
                 }
                 DestroyImmediate(_preset);
                 DestroyImmediate(_presetEditor);
-                DestroyImmediate(_component);
+                DestroyImmediate(_presetTemporaryObject);
                 serializedObject.ApplyModifiedProperties();
             }
 
@@ -88,14 +89,19 @@ namespace Gilzoide.RuntimePreset.Editor
 
             EditorGUILayout.Space();
 
-            if (_component == null)
+            if (_presetTemporaryObject == null && newMonoScript.GetClass().IsSubclassOf(typeof(Component)))
             {
-                _component = _componentHolder.AddComponent(newMonoScript.GetClass());
-                Debug.Assert(runtimePreset.ApplyTo(_component), "FIXME!!!");
+                _presetTemporaryObject = _componentHolder.AddComponent(newMonoScript.GetClass());
+                Debug.Assert(runtimePreset.ApplyTo(_presetTemporaryObject), "FIXME!!!");
+            }
+            if (_presetTemporaryObject == null && newMonoScript.GetClass().IsSubclassOf(typeof(ScriptableObject)))
+            {
+                _presetTemporaryObject = CreateInstance(newMonoScript.GetClass());
+                Debug.Assert(runtimePreset.ApplyTo(_presetTemporaryObject), "FIXME!!!");
             }
             if (_preset == null)
             {
-                _preset = new Preset(_component);
+                _preset = new Preset(_presetTemporaryObject);
                 _preset.ExcludeAllPropertiesBut(EnumerateJsonKeys());
             }
             if (_presetEditor == null)
@@ -108,25 +114,25 @@ namespace Gilzoide.RuntimePreset.Editor
             _preset.GetIncludedPropertySet(_includedProperties);
             if (EditorGUI.EndChangeCheck() || !_includedProperties.SetEquals(EnumerateJsonKeys()))
             {
-                FillModifiedValuesJson(_preset, _component);
+                FillModifiedValuesJson(_preset, _presetTemporaryObject);
             }
 
             serializedObject.ApplyModifiedProperties();
         }
 
-        private void FillModifiedValuesJson(Preset preset, Component component)
+        private void FillModifiedValuesJson(Preset preset, Object obj)
         {
             objectReferencesProperty.ClearArray();
 
             using (HelperExtensions.GetPooledDictionary<string, object>(out var values))
             using (HelperExtensions.GetPooledDictionary<string, object>(out var objects))
             {
-                Debug.Assert(preset.ApplyTo(component), "FIXME!!!");
+                Debug.Assert(preset.ApplyTo(obj), "FIXME!!!");
 
-                var serializedComponent = new SerializedObject(component);
+                using (var serializedObj = new SerializedObject(obj))
                 foreach (PropertyModification modification in preset.PropertyModifications)
                 {
-                    SerializedProperty property = serializedComponent.FindProperty(modification.propertyPath);
+                    SerializedProperty property = serializedObj.FindProperty(modification.propertyPath);
                     switch (property.propertyType)
                     {
                         case SerializedPropertyType.Boolean:
