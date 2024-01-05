@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using UnityEditor;
 using UnityEditor.Presets;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Gilzoide.RuntimePreset.Editor
 {
@@ -60,44 +62,25 @@ namespace Gilzoide.RuntimePreset.Editor
                 return;
             }
 
+
             RuntimePreset runtimePreset = (RuntimePreset) serializedObject.targetObject;
-            MonoScript monoScript = runtimePreset.TargetMonoScript;
-
-            MonoScript newMonoScript = (MonoScript) EditorGUILayout.ObjectField(_targetTypeContent, monoScript, typeof(MonoScript), false);
-            if (newMonoScript && !newMonoScript.GetClass().IsSubclassOf(typeof(Object)))
+            Type targetType = runtimePreset.TargetType;
+            if (targetType == null)
             {
-                return;
-            }
-
-            if (newMonoScript != monoScript)
-            {
-                targetTypeProperty.stringValue = newMonoScript != null ? newMonoScript.GetClass().FullName : "";
-                if (newMonoScript == null)
-                {
-                    objectsJsonProperty.stringValue = "{}";
-                    valuesJsonProperty.stringValue = "{}";
-                }
-                DestroyImmediate(_preset);
-                DestroyImmediate(_presetEditor);
-                DestroyImmediate(_presetTemporaryObject);
-                serializedObject.ApplyModifiedProperties();
-            }
-
-            if (newMonoScript == null)
-            {
+                EditorGUILayout.HelpBox($"Could not find target type: '{targetTypeProperty.stringValue}'", MessageType.Error);
                 return;
             }
 
             EditorGUILayout.Space();
 
-            if (_presetTemporaryObject == null && newMonoScript.GetClass().IsSubclassOf(typeof(Component)))
+            if (_presetTemporaryObject == null && targetType.IsSubclassOf(typeof(Component)))
             {
-                _presetTemporaryObject = _componentHolder.AddComponent(newMonoScript.GetClass());
+                _presetTemporaryObject = _componentHolder.AddComponent(targetType);
                 Debug.Assert(runtimePreset.TryApplyTo(_presetTemporaryObject), "FIXME!!!");
             }
-            if (_presetTemporaryObject == null && newMonoScript.GetClass().IsSubclassOf(typeof(ScriptableObject)))
+            if (_presetTemporaryObject == null && targetType.IsSubclassOf(typeof(ScriptableObject)))
             {
-                _presetTemporaryObject = CreateInstance(newMonoScript.GetClass());
+                _presetTemporaryObject = CreateInstance(targetType);
                 Debug.Assert(runtimePreset.TryApplyTo(_presetTemporaryObject), "FIXME!!!");
             }
             if (_preset == null)

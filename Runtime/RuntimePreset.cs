@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
@@ -19,31 +18,9 @@ namespace Gilzoide.RuntimePreset
 
         public Type TargetType
         {
-            get
-            {
-#if UNITY_EDITOR
-                return Type.GetType(_targetType) ?? TargetMonoScript?.GetClass();
-#else
-                return Type.GetType(_targetType);
-#endif
-            }
-            set => _targetType = value.FullName;
+            get => Type.GetType(_targetType);
+            set => _targetType = value?.AssemblyQualifiedName ?? "";
         }
-
-#if UNITY_EDITOR
-        public MonoScript TargetMonoScript
-        {
-            get
-            {
-                string[] guid = AssetDatabase.FindAssets($"t:MonoScript {_targetType.Split('.').Last()}");
-                if (guid.Length != 1)
-                {
-                    return null;
-                }
-                return AssetDatabase.LoadAssetAtPath<MonoScript>(AssetDatabase.GUIDToAssetPath(guid[0]));
-            }
-        }
-#endif
 
         public bool CanBeAppliedTo(Object obj)
         {
