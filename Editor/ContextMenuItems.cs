@@ -10,17 +10,7 @@ namespace Gilzoide.RuntimePreset.Editor
         {
             if (command.context is MonoBehaviour component)
             {
-                string path = EditorUtility.SaveFilePanelInProject("Create Runtime Preset", component.GetType().Name + "_preset", "asset", "");
-                if (string.IsNullOrWhiteSpace(path))
-                {
-                    return;
-                }
-
-                RuntimePreset newPreset = ScriptableObject.CreateInstance<RuntimePreset>();
-                newPreset.TargetType = component.GetType();
-                // TODO: fill new preset with existing values
-                AssetDatabase.CreateAsset(newPreset, path);
-                EditorGUIUtility.PingObject(newPreset);
+                CreateRuntimePreset(component);
             }
         }
 
@@ -29,18 +19,23 @@ namespace Gilzoide.RuntimePreset.Editor
         {
             if (command.context is ScriptableObject obj)
             {
-                string path = EditorUtility.SaveFilePanelInProject("Create Runtime Preset", obj.GetType().Name + "_preset", "asset", "");
-                if (string.IsNullOrWhiteSpace(path))
-                {
-                    return;
-                }
-
-                RuntimePreset newPreset = ScriptableObject.CreateInstance<RuntimePreset>();
-                newPreset.TargetType = obj.GetType();
-                // TODO: fill new preset with existing values
-                AssetDatabase.CreateAsset(newPreset, path);
-                EditorGUIUtility.PingObject(newPreset);
+                CreateRuntimePreset(obj);
             }
+        }
+
+        private static void CreateRuntimePreset(Object obj)
+        {
+            string path = EditorUtility.SaveFilePanelInProject("Create Runtime Preset", obj.GetType().Name + "_preset", "asset", "");
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return;
+            }
+
+            RuntimePreset newPreset = ScriptableObject.CreateInstance<RuntimePreset>();
+            newPreset.TargetType = obj.GetType();
+            // TODO: fill new preset with existing values
+            AssetDatabase.CreateAsset(newPreset, path);
+            EditorGUIUtility.PingObject(newPreset);
         }
     }
 }
