@@ -34,7 +34,7 @@ namespace Gilzoide.RuntimePreset
         }
 
         /// <summary>
-        /// Alias for <see cref="TryApplyTo"/> that ignores the returned value
+        /// Alias for <see cref="TryApplyTo"/> that ignores the returned value.
         /// </summary>
         /// <seealso cref="TryApplyTo"/>
         public void ApplyTo(Object targetObject)
