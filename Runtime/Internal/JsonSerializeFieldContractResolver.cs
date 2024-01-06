@@ -17,7 +17,8 @@ namespace Gilzoide.RuntimePreset
             List<MemberInfo> members = new List<MemberInfo>();
             foreach (FieldInfo field in objectType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
             {
-                if (field.IsPublic || field.GetCustomAttribute<SerializeField>() != null)
+                if ((field.IsPublic && field.GetCustomAttribute<NonSerializedAttribute>() == null)
+                    || field.GetCustomAttribute<SerializeField>() != null)
                 {
                     members.Add(field);
                 }
