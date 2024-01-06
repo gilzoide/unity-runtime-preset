@@ -14,12 +14,22 @@ namespace Gilzoide.RuntimePreset
 
         protected override List<MemberInfo> GetSerializableMembers(Type objectType)
         {
-            List<MemberInfo> members = base.GetSerializableMembers(objectType);
-            foreach (FieldInfo field in objectType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
+            List<MemberInfo> members = new List<MemberInfo>();
+            foreach (FieldInfo field in objectType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
             {
-                if (field.GetCustomAttribute<SerializeField>() != null)
+                if (field.IsPublic || field.GetCustomAttribute<SerializeField>() != null)
                 {
                     members.Add(field);
+                }
+            }
+            for (Type baseType = objectType.BaseType; baseType != null; baseType = baseType.BaseType)
+            {
+                foreach (FieldInfo field in baseType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance))
+                {
+                    if (field.IsPrivate && field.GetCustomAttribute<SerializeField>() != null)
+                    {
+                        members.Add(field);
+                    }
                 }
             }
             return members;
@@ -27,15 +37,7 @@ namespace Gilzoide.RuntimePreset
 
         protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
         {
-            JsonProperty jsonProperty = base.CreateProperty(member, memberSerialization);
-            if (member is FieldInfo && member.GetCustomAttribute<SerializeField>() != null)
-            {
-                jsonProperty.Ignored = false;
-                jsonProperty.Writable = true;
-                jsonProperty.Readable = true;
-                jsonProperty.HasMemberAttribute = true;
-            }
-            return jsonProperty;
+            return base.CreateProperty(member, MemberSerialization.Fields);
         }
     }
 }
