@@ -11,7 +11,10 @@ namespace Gilzoide.RuntimePreset.Editor
             {
                 foreach (RuntimePreset runtimePreset in presetApplier.Presets)
                 {
-                    context.DependsOnCustomDependency(runtimePreset.AssetDependencyKey);
+                    if (runtimePreset)
+                    {
+                        context.DependsOnCustomDependency(runtimePreset.AssetDependencyKey);
+                    }
                 }
                 if (presetApplier.ApplyAt.HasFlag(PresetApplicationEvent.OnImport))
                 {

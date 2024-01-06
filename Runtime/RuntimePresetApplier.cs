@@ -47,7 +47,10 @@ namespace Gilzoide.RuntimePreset
             Object target = _target ? _target : gameObject;
             foreach (RuntimePreset runtimePreset in _presets)
             {
-                runtimePreset.ApplyTo(target);
+                if (runtimePreset)
+                {
+                    runtimePreset.ApplyTo(target);
+                }
             }
         }
     }
