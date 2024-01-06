@@ -93,10 +93,9 @@ namespace Gilzoide.RuntimePreset.Editor
                 _presetEditor = CreateEditor(_preset);
             }
 
-            EditorGUI.BeginChangeCheck();
             _presetEditor.OnInspectorGUI();
             _preset.GetIncludedPropertySet(_includedProperties);
-            if (EditorGUI.EndChangeCheck() || !_includedProperties.SetEquals(EnumerateJsonKeys()))
+            if (!_preset.DataEquals(_presetTemporaryObject) || !_includedProperties.SetEquals(EnumerateJsonKeys()))
             {
                 FillModifiedValuesJson(_preset, _presetTemporaryObject);
             }
