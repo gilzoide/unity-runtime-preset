@@ -10,8 +10,8 @@ namespace Gilzoide.RuntimePreset
     public class RuntimePreset : ScriptableObject, ISerializationCallbackReceiver
     {
         [SerializeField] internal string _targetType = "";
-        [SerializeField] internal string _valuesJson = "{}";
-        [SerializeField] internal string _objectsJson = "{}";
+        [SerializeField] internal string _unityJson = "{}";
+        [SerializeField] internal string _newtonsoftJson = "{}";
         [SerializeField] internal List<Object> _objectReferences = new List<Object>();
         
         private JsonSerializerSettings _jsonSettings;
@@ -43,8 +43,8 @@ namespace Gilzoide.RuntimePreset
             }
             if (CanBeAppliedTo(obj))
             {
-                JsonUtility.FromJsonOverwrite(_valuesJson, obj);
-                JsonConvert.PopulateObject(_objectsJson, obj, _jsonSettings);
+                JsonUtility.FromJsonOverwrite(_unityJson, obj);
+                JsonConvert.PopulateObject(_newtonsoftJson, obj, _jsonSettings);
                 if (obj is IRuntimePresetListener presetListener)
                 {
                     presetListener.OnPresetApplied();
@@ -84,20 +84,20 @@ namespace Gilzoide.RuntimePreset
         {
             try
             {
-                var _ = JsonConvert.DeserializeObject<Dictionary<string, object>>(_valuesJson);
+                var _ = JsonConvert.DeserializeObject<Dictionary<string, object>>(_unityJson);
             }
             catch (Exception)
             {
-                _valuesJson = "{}";
+                _unityJson = "{}";
             }
 
             try
             {
-                var _ = JsonConvert.DeserializeObject<Dictionary<string, object>>(_objectsJson);
+                var _ = JsonConvert.DeserializeObject<Dictionary<string, object>>(_newtonsoftJson);
             }
             catch (Exception)
             {
-                _objectsJson = "{}";
+                _newtonsoftJson = "{}";
             }
         }
 #endif

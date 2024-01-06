@@ -5,7 +5,6 @@ using Object = UnityEngine.Object;
 
 namespace Gilzoide.RuntimePreset
 {
-    [Serializable]
     public class JsonObjectConverter : JsonConverter<Object>
     {
         public JsonObjectConverter(List<Object> objects)

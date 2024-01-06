@@ -15,8 +15,8 @@ namespace Gilzoide.RuntimePreset.Editor
         private readonly GUIContent _targetTypeContent = new GUIContent("Target Type");
 
         private SerializedProperty targetTypeProperty;
-        private SerializedProperty valuesJsonProperty;
-        private SerializedProperty objectsJsonProperty;
+        private SerializedProperty unityJsonProperty;
+        private SerializedProperty newtonsoftJsonProperty;
         private SerializedProperty objectReferencesProperty;
 
         private Object _presetTemporaryObject;
@@ -28,8 +28,8 @@ namespace Gilzoide.RuntimePreset.Editor
         void OnEnable()
         {
             targetTypeProperty = serializedObject.FindProperty(nameof(RuntimePreset._targetType));
-            valuesJsonProperty = serializedObject.FindProperty(nameof(RuntimePreset._valuesJson));
-            objectsJsonProperty = serializedObject.FindProperty(nameof(RuntimePreset._objectsJson));
+            unityJsonProperty = serializedObject.FindProperty(nameof(RuntimePreset._unityJson));
+            newtonsoftJsonProperty = serializedObject.FindProperty(nameof(RuntimePreset._newtonsoftJson));
             objectReferencesProperty = serializedObject.FindProperty(nameof(RuntimePreset._objectReferences));
 
             _componentHolder = new GameObject(nameof(RuntimePresetEditor))
@@ -110,8 +110,8 @@ namespace Gilzoide.RuntimePreset.Editor
         {
             objectReferencesProperty.ClearArray();
 
-            using (HelperExtensions.GetPooledDictionary<string, object>(out var values))
-            using (HelperExtensions.GetPooledDictionary<string, object>(out var objects))
+            using (HelperExtensions.GetPooledDictionary<string, object>(out var unityValues))
+            using (HelperExtensions.GetPooledDictionary<string, object>(out var newtonsoftValues))
             {
                 Debug.Assert(preset.ApplyTo(obj), "FIXME!!!");
 
@@ -122,22 +122,22 @@ namespace Gilzoide.RuntimePreset.Editor
                     switch (property.propertyType)
                     {
                         case SerializedPropertyType.Boolean:
-                            values.SetNested(property.propertyPath, property.boolValue);
+                            unityValues.SetNested(property.propertyPath, property.boolValue);
                             break;
                         case SerializedPropertyType.Integer:
-                            values.SetNested(property.propertyPath, property.intValue);
+                            unityValues.SetNested(property.propertyPath, property.intValue);
                             break;
                         case SerializedPropertyType.Float:
-                            values.SetNested(property.propertyPath, property.doubleValue);
+                            unityValues.SetNested(property.propertyPath, property.doubleValue);
                             break;
                         case SerializedPropertyType.Character:
-                            values.SetNested(property.propertyPath, property.intValue);
+                            unityValues.SetNested(property.propertyPath, property.intValue);
                             break;
                         case SerializedPropertyType.String:
-                            values.SetNested(property.propertyPath, property.stringValue);
+                            unityValues.SetNested(property.propertyPath, property.stringValue);
                             break;
                         case SerializedPropertyType.Enum:
-                            values.SetNested(property.propertyPath, property.intValue);
+                            unityValues.SetNested(property.propertyPath, property.intValue);
                             break;
                         case SerializedPropertyType.ObjectReference:
                             if (property.objectReferenceValue != null)
@@ -145,11 +145,11 @@ namespace Gilzoide.RuntimePreset.Editor
                                 int index = objectReferencesProperty.arraySize;
                                 objectReferencesProperty.InsertArrayElementAtIndex(index);
                                 objectReferencesProperty.GetArrayElementAtIndex(index).objectReferenceValue = property.objectReferenceValue;
-                                objects.SetNested(property.propertyPath, index);
+                                newtonsoftValues.SetNested(property.propertyPath, index);
                             }
                             else
                             {
-                                objects.SetNested(property.propertyPath, -1);
+                                newtonsoftValues.SetNested(property.propertyPath, -1);
                             }
                             break;
                         default:
@@ -158,15 +158,15 @@ namespace Gilzoide.RuntimePreset.Editor
                     }
                 }
 
-                valuesJsonProperty.stringValue = JsonConvert.SerializeObject(values);
-                objectsJsonProperty.stringValue = JsonConvert.SerializeObject(objects);
+                unityJsonProperty.stringValue = JsonConvert.SerializeObject(unityValues);
+                newtonsoftJsonProperty.stringValue = JsonConvert.SerializeObject(newtonsoftValues);
             }
         }
 
         private IEnumerable<string> EnumerateJsonKeys()
         {
-            return valuesJsonProperty.stringValue.EnumerateNestedJsonKeys()
-                .Concat(objectsJsonProperty.stringValue.EnumerateNestedJsonKeys());
+            return unityJsonProperty.stringValue.EnumerateNestedJsonKeys()
+                .Concat(newtonsoftJsonProperty.stringValue.EnumerateNestedJsonKeys());
         }
     }
 }
