@@ -7,6 +7,7 @@ namespace Gilzoide.RuntimePreset
     {
         [SerializeField] protected List<RuntimePreset> _presets;
         [SerializeField] protected PresetApplicationEvent _applyAt = PresetApplicationEvent.Awake;
+        [SerializeField] protected internal bool _destroyAfterImport = false;
 
         public List<RuntimePreset> Presets => _presets;
         public PresetApplicationEvent ApplyAt

@@ -8,5 +8,6 @@ namespace Gilzoide.RuntimePreset
         Awake = 1 << 0,
         OnEnable = 1 << 1,
         Start = 1 << 2,
+        OnImport = 1 << 3,
     }
 }

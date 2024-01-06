@@ -73,6 +73,13 @@ namespace Gilzoide.RuntimePreset
         #endregion
 
 #if UNITY_EDITOR
+        public string AssetDependencyKey => $"{typeof(RuntimePreset).FullName}.{AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(this))}";
+
+        internal void AssetUpdated()
+        {
+            AssetDatabase.RegisterCustomDependency(AssetDependencyKey, Hash128.Compute(EditorJsonUtility.ToJson(this)));
+        }
+
         void OnValidate()
         {
             try
