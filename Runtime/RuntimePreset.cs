@@ -45,6 +45,10 @@ namespace Gilzoide.RuntimePreset
             {
                 JsonUtility.FromJsonOverwrite(_valuesJson, obj);
                 JsonConvert.PopulateObject(_objectsJson, obj, _jsonSettings);
+                if (obj is IRuntimePresetListener presetListener)
+                {
+                    presetListener.OnPresetApplied();
+                }
                 return true;
             }
             return false;
