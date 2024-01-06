@@ -17,7 +17,7 @@ Functionality analogous to Unity's [Preset](https://docs.unity3d.com/ScriptRefer
 - Runs before other scripts, so that new values from automatically applied presets should be available on your components' `Awake`, `OnEnable` and `Start` methods
 - Presets can be applied at prefab/scene import time by checking "On Import" in the "Apply At" flags
   + Optionally mark the checkbox "Destroy After Import" to destroy the runtime preset applier right after importing, to avoid any runtime processing
-  + Prefabs with presets applied at import time are reimported automatically when the preset is changed
+  + Prefabs with presets applied at import time are reimported automatically if preset values get changed in the inspector
 
 
 ## Caveats

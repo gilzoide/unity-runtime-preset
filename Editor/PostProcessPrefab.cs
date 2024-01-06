@@ -9,15 +9,15 @@ namespace Gilzoide.RuntimePreset.Editor
         {
             foreach (RuntimePresetApplier presetApplier in gameObject.GetComponentsInChildren<RuntimePresetApplier>(true))
             {
-                foreach (RuntimePreset runtimePreset in presetApplier.Presets)
-                {
-                    if (runtimePreset)
-                    {
-                        context.DependsOnCustomDependency(runtimePreset.AssetDependencyKey);
-                    }
-                }
                 if (presetApplier.ApplyAt.HasFlag(PresetApplicationEvent.OnImport))
                 {
+                    foreach (RuntimePreset runtimePreset in presetApplier.Presets)
+                    {
+                        if (runtimePreset)
+                        {
+                            context.DependsOnCustomDependency(runtimePreset.AssetDependencyKey);
+                        }
+                    }
                     presetApplier.Apply();
                 }
                 if (presetApplier._destroyAfterImport)
