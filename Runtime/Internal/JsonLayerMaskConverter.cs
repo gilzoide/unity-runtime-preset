@@ -16,7 +16,7 @@ namespace Gilzoide.RuntimePreset
                     return obj.GetValue("m_Bits")?.Value<int>() ?? default;
                 
                 default:
-                    return reader.ReadAsInt32() ?? default;
+                    return Convert.ToInt32(reader.Value);
             }
         }
 
