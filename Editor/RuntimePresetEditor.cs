@@ -97,9 +97,10 @@ namespace Gilzoide.RuntimePreset.Editor
                 FillModifiedValuesJson(_preset, _presetTemporaryObject);
             }
 
-            serializedObject.ApplyModifiedProperties();
-
-            runtimePreset.AssetUpdated();
+            if (serializedObject.ApplyModifiedProperties())
+            {
+                runtimePreset.MarkAssetUpdated();
+            }
         }
 
         private void FillModifiedValuesJson(Preset preset, Object obj)
