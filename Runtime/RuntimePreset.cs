@@ -15,12 +15,17 @@ namespace Gilzoide.RuntimePreset
         
         private JsonSerializerSettings _jsonSettings;
 
+        /// <summary>
+        /// Target type for preset.
+        /// Presets can only be applied to objects of this type.
+        /// </summary>
         public Type TargetType
         {
             get => Type.GetType(_targetType);
             set => _targetType = value?.AssemblyQualifiedName ?? "";
         }
 
+        /// <returns>Whether this preset can be applied to <paramref name="obj"/></returns>
         public bool CanBeAppliedTo(Object obj)
         {
             return obj != null
@@ -28,28 +33,48 @@ namespace Gilzoide.RuntimePreset
                 && targetType.IsAssignableFrom(obj.GetType());
         }
 
-        public void ApplyTo(Object obj)
+        /// <summary>
+        /// Alias for <see cref="TryApplyTo"/> that ignores the returned value
+        /// </summary>
+        /// <seealso cref="TryApplyTo"/>
+        public void ApplyTo(Object targetObject)
         {
-            TryApplyTo(obj);
+            TryApplyTo(targetObject);
         }
 
-        public bool TryApplyTo(Object obj)
+        /// <summary>
+        /// Try applying preset values to the target object.
+        /// </summary>
+        /// <remarks>
+        /// If the target object is <see langword="null"/> or does not inherit from <see cref="TargetType"/>, the call is a no-op.
+        /// If the target object is a <see cref="GameObject"/> and this preset's target type is a component, <see cref="GetComponent"/> is used to find the correct target component.
+        /// If the target object implements <see cref="IRuntimePresetListener"/> it will be notified after the values were applied.
+        /// </remarks>
+        /// <returns>
+        /// Whether the preset's values were successfully applied to the target object.
+        /// </returns>
+        /// <seealso cref="ApplyTo"/>
+        public bool TryApplyTo(Object targetObject)
         {
-            Type targetType = TargetType;
-            if (targetType != null && obj is GameObject gameObject && targetType.IsSubclassOf(typeof(Component)))
+            if (targetObject is GameObject gameObject
+                && TargetType is Type targetType
+                && targetType.IsSubclassOf(typeof(Component)))
             {
-                obj = gameObject.GetComponent(targetType);
+                targetObject = gameObject.GetComponent(targetType);
             }
-            if (CanBeAppliedTo(obj))
+            if (CanBeAppliedTo(targetObject))
             {
-                JsonConvert.PopulateObject(_valuesJson, obj, _jsonSettings);
-                if (obj is IRuntimePresetListener presetListener)
+                JsonConvert.PopulateObject(_valuesJson, targetObject, _jsonSettings);
+                if (targetObject is IRuntimePresetListener presetListener)
                 {
                     presetListener.OnPresetApplied();
                 }
                 return true;
             }
-            return false;
+            else
+            {
+                return false;
+            }
         }
 
         #region ISerializationCallbackReceiver
