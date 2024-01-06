@@ -20,7 +20,6 @@ Functionality analogous to Unity's [`Preset`](https://docs.unity3d.com/ScriptRef
 
 ## Caveats
 - Field types that don't work yet:
-  + LayerMask
   + Gradient
   + Arrays/lists
 - Only works with MonoBehaviour and ScriptableObject subclasses

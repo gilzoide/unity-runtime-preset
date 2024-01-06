@@ -64,7 +64,7 @@ namespace Gilzoide.RuntimePreset
         {
             _jsonSettings = new JsonSerializerSettings
             {
-                Converters = new[] { new JsonObjectConverter(_objectReferences) },
+                Converters = new JsonConverter[] { new JsonObjectConverter(_objectReferences), new JsonLayerMaskConverter() },
                 ContractResolver = JsonSerializeFieldContractResolver.Instance,
                 NullValueHandling = NullValueHandling.Include,
             };
