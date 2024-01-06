@@ -27,10 +27,10 @@ namespace Gilzoide.RuntimePreset.Editor
 
         void OnEnable()
         {
-            targetTypeProperty = serializedObject.FindProperty("_targetType");
-            valuesJsonProperty = serializedObject.FindProperty("_valuesJson");
-            objectsJsonProperty = serializedObject.FindProperty("_objectsJson");
-            objectReferencesProperty = serializedObject.FindProperty("_objectReferences");
+            targetTypeProperty = serializedObject.FindProperty(nameof(RuntimePreset._targetType));
+            valuesJsonProperty = serializedObject.FindProperty(nameof(RuntimePreset._valuesJson));
+            objectsJsonProperty = serializedObject.FindProperty(nameof(RuntimePreset._objectsJson));
+            objectReferencesProperty = serializedObject.FindProperty(nameof(RuntimePreset._objectReferences));
 
             _componentHolder = new GameObject(nameof(RuntimePresetEditor))
             {

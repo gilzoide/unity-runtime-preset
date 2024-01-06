@@ -9,10 +9,10 @@ namespace Gilzoide.RuntimePreset
 {
     public class RuntimePreset : ScriptableObject, ISerializationCallbackReceiver
     {
-        [SerializeField] private string _targetType = "";
-        [SerializeField] private string _valuesJson = "{}";
-        [SerializeField] private string _objectsJson = "{}";
-        [SerializeField] private List<Object> _objectReferences = new List<Object>();
+        [SerializeField] internal string _targetType = "";
+        [SerializeField] internal string _valuesJson = "{}";
+        [SerializeField] internal string _objectsJson = "{}";
+        [SerializeField] internal List<Object> _objectReferences = new List<Object>();
         
         private JsonSerializerSettings _jsonSettings;
 
