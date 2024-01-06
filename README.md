@@ -10,7 +10,7 @@ Functionality analogous to Unity's [Preset](https://docs.unity3d.com/ScriptRefer
 - Optionally implement [IRuntimePresetListener](Runtime/IRuntimePresetListener.cs) in your MonoBehaviour or ScriptableObject subclass to get notified when a runtime preset has been applied to it
 - If the preset was created from a component, uses `GetComponent` when applied to a GameObject to get the correct target object
 
-[RuntimePresetApplier](Runtime/RuntimePresetApplier.cs): component that applies presets to a target object, which by default is its own GameObject
+[RuntimePresetApplier](Runtime/RuntimePresetApplier.cs): component that applies presets to its GameObject
 - Supports automatic application in `Awake`, `OnEnable` and `Start`
 - Runs before other scripts, so that new values from automatically applied presets should be available on your components' `Awake`, `OnEnable` and `Start` methods
 - Presets can be applied at prefab/scene import time by checking "On Import" in the "Apply At" flags
