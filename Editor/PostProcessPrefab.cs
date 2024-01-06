@@ -11,7 +11,7 @@ namespace Gilzoide.RuntimePreset.Editor
             {
                 if (presetApplier.ApplyAt.HasFlag(PresetApplicationEvent.OnImport))
                 {
-                    foreach (RuntimePreset runtimePreset in presetApplier.Presets)
+                    foreach ((_, RuntimePreset runtimePreset) in presetApplier.PresetApplications)
                     {
                         if (runtimePreset)
                         {
@@ -20,7 +20,7 @@ namespace Gilzoide.RuntimePreset.Editor
                     }
                     presetApplier.Apply();
                 }
-                if (presetApplier._destroyAfterImport)
+                if (presetApplier.DestroyAfterImport)
                 {
                     Object.DestroyImmediate(presetApplier, true);
                 }

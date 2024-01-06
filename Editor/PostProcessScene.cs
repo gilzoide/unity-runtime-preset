@@ -14,7 +14,7 @@ namespace Gilzoide.RuntimePreset.Editor
                 {
                     presetApplier.Apply();
                 }
-                if (presetApplier._destroyAfterImport)
+                if (presetApplier.DestroyAfterImport)
                 {
                     Object.DestroyImmediate(presetApplier, true);
                 }
