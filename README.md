@@ -1,4 +1,6 @@
 # Runtime Preset
+[![openupm](https://img.shields.io/npm/v/com.gilzoide.runtime-preset?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.gilzoide.runtime-preset/)
+
 Functionality analogous to Unity's [Preset](https://docs.unity3d.com/ScriptReference/Presets.Preset.html) that can be used at runtime and prefab/scene import time.
 
 
@@ -29,6 +31,10 @@ Functionality analogous to Unity's [Preset](https://docs.unity3d.com/ScriptRefer
 
 ## How to install
 Either:
+- Use the [openupm registry](https://openupm.com/) and install this package using the [openupm-cli](https://github.com/openupm/openupm-cli):
+  ```
+  openupm add com.gilzoide.runtime-preset
+  ```
 - Install using the [Unity Package Manager](https://docs.unity3d.com/Manual/upm-ui-giturl.html) with the following URL:
   ```
   https://github.com/gilzoide/unity-runtime-preset.git#1.0.0-preview1
