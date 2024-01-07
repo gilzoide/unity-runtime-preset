@@ -1,4 +1,5 @@
 using UnityEditor;
+using UnityEditor.Presets;
 using UnityEngine;
 
 namespace Gilzoide.RuntimePreset.Editor
@@ -31,11 +32,15 @@ namespace Gilzoide.RuntimePreset.Editor
                 return;
             }
 
-            RuntimePreset newPreset = ScriptableObject.CreateInstance<RuntimePreset>();
-            newPreset.TargetType = obj.GetType();
-            // TODO: fill new preset with existing values
-            AssetDatabase.CreateAsset(newPreset, path);
-            EditorGUIUtility.PingObject(newPreset);
+            RuntimePreset runtimePreset = ScriptableObject.CreateInstance<RuntimePreset>();
+            runtimePreset.TargetType = obj.GetType();
+
+            var tempPreset = new Preset(obj);
+            tempPreset.FillRuntimePreset(runtimePreset, obj);
+            Object.DestroyImmediate(tempPreset);
+            
+            AssetDatabase.CreateAsset(runtimePreset, path);
+            EditorGUIUtility.PingObject(runtimePreset);
         }
     }
 }

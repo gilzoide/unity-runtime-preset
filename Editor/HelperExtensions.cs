@@ -4,6 +4,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using UnityEditor;
 using UnityEditor.Presets;
+using UnityEngine;
 
 namespace Gilzoide.RuntimePreset.Editor
 {
@@ -47,6 +48,65 @@ namespace Gilzoide.RuntimePreset.Editor
                 preset.GetIncludedPropertySet(properties);
                 properties.ExceptWith(includeProperties);
                 preset.excludedProperties = properties.ToArray();
+            }
+        }
+
+        public static void FillRuntimePreset(this Preset preset, RuntimePreset runtimePreset, Object objectWithPresetApplied)
+        {
+            var serializedRuntimePreset = new SerializedObject(runtimePreset);
+            preset.FillRuntimePreset(serializedRuntimePreset, objectWithPresetApplied);
+            serializedRuntimePreset.ApplyModifiedProperties();
+        }
+
+        public static void FillRuntimePreset(this Preset preset, SerializedObject serializedRuntimePreset, Object objectWithPresetApplied)
+        {
+            SerializedProperty valuesJsonProperty = serializedRuntimePreset.FindProperty(nameof(RuntimePreset._valuesJson));
+            SerializedProperty objectReferencesProperty = serializedRuntimePreset.FindProperty(nameof(RuntimePreset._objectReferences));
+
+            objectReferencesProperty.ClearArray();
+
+            using (GetPooledDictionary<string, object>(out var values))
+            {
+                using (var serializedObj = new SerializedObject(objectWithPresetApplied))
+                foreach (PropertyModification modification in preset.PropertyModifications)
+                {
+                    SerializedProperty property = serializedObj.FindProperty(modification.propertyPath);
+                    switch (property.propertyType)
+                    {
+                        case SerializedPropertyType.Boolean:
+                            values.SetNested(property.propertyPath, property.boolValue);
+                            break;
+                        case SerializedPropertyType.Integer:
+                        case SerializedPropertyType.Character:
+                        case SerializedPropertyType.Enum:
+                            values.SetNested(property.propertyPath, property.longValue);
+                            break;
+                        case SerializedPropertyType.Float:
+                            values.SetNested(property.propertyPath, property.doubleValue);
+                            break;
+                        case SerializedPropertyType.String:
+                            values.SetNested(property.propertyPath, property.stringValue);
+                            break;
+                        case SerializedPropertyType.ObjectReference:
+                            if (property.objectReferenceValue != null)
+                            {
+                                int index = objectReferencesProperty.arraySize;
+                                objectReferencesProperty.InsertArrayElementAtIndex(index);
+                                objectReferencesProperty.GetArrayElementAtIndex(index).objectReferenceValue = property.objectReferenceValue;
+                                values.SetNested(property.propertyPath, index);
+                            }
+                            else
+                            {
+                                values.SetNested(property.propertyPath, -1);
+                            }
+                            break;
+                        default:
+                            Debug.LogWarning($"[{nameof(RuntimePreset)}] Type {property.propertyType} is not supported (path: {property.propertyPath})");
+                            break;
+                    }
+                }
+
+                valuesJsonProperty.stringValue = JsonConvert.SerializeObject(values);
             }
         }
 

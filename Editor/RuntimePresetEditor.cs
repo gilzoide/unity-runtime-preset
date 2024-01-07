@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 using UnityEditor;
 using UnityEditor.Presets;
 using UnityEngine;
@@ -15,7 +14,6 @@ namespace Gilzoide.RuntimePreset.Editor
 
         private SerializedProperty targetTypeProperty;
         private SerializedProperty valuesJsonProperty;
-        private SerializedProperty objectReferencesProperty;
 
         private Object _presetTemporaryObject;
         private GameObject _componentHolder;
@@ -27,7 +25,6 @@ namespace Gilzoide.RuntimePreset.Editor
         {
             targetTypeProperty = serializedObject.FindProperty(nameof(RuntimePreset._targetType));
             valuesJsonProperty = serializedObject.FindProperty(nameof(RuntimePreset._valuesJson));
-            objectReferencesProperty = serializedObject.FindProperty(nameof(RuntimePreset._objectReferences));
 
             _componentHolder = new GameObject(nameof(RuntimePresetEditor))
             {
@@ -94,63 +91,13 @@ namespace Gilzoide.RuntimePreset.Editor
             _preset.GetIncludedPropertySet(_includedProperties);
             if (!_preset.DataEquals(_presetTemporaryObject) || !_includedProperties.SetEquals(EnumerateJsonKeys()))
             {
-                FillModifiedValuesJson(_preset, _presetTemporaryObject);
+                Debug.Assert(_preset.ApplyTo(_presetTemporaryObject), "FIXME!!!");
+                _preset.FillRuntimePreset(serializedObject, _presetTemporaryObject);
             }
 
             if (serializedObject.ApplyModifiedProperties())
             {
                 runtimePreset.MarkAssetUpdated();
-            }
-        }
-
-        private void FillModifiedValuesJson(Preset preset, Object obj)
-        {
-            objectReferencesProperty.ClearArray();
-
-            using (HelperExtensions.GetPooledDictionary<string, object>(out var values))
-            {
-                Debug.Assert(preset.ApplyTo(obj), "FIXME!!!");
-
-                using (var serializedObj = new SerializedObject(obj))
-                foreach (PropertyModification modification in preset.PropertyModifications)
-                {
-                    SerializedProperty property = serializedObj.FindProperty(modification.propertyPath);
-                    switch (property.propertyType)
-                    {
-                        case SerializedPropertyType.Boolean:
-                            values.SetNested(property.propertyPath, property.boolValue);
-                            break;
-                        case SerializedPropertyType.Integer:
-                        case SerializedPropertyType.Character:
-                        case SerializedPropertyType.Enum:
-                            values.SetNested(property.propertyPath, property.longValue);
-                            break;
-                        case SerializedPropertyType.Float:
-                            values.SetNested(property.propertyPath, property.doubleValue);
-                            break;
-                        case SerializedPropertyType.String:
-                            values.SetNested(property.propertyPath, property.stringValue);
-                            break;
-                        case SerializedPropertyType.ObjectReference:
-                            if (property.objectReferenceValue != null)
-                            {
-                                int index = objectReferencesProperty.arraySize;
-                                objectReferencesProperty.InsertArrayElementAtIndex(index);
-                                objectReferencesProperty.GetArrayElementAtIndex(index).objectReferenceValue = property.objectReferenceValue;
-                                values.SetNested(property.propertyPath, index);
-                            }
-                            else
-                            {
-                                values.SetNested(property.propertyPath, -1);
-                            }
-                            break;
-                        default:
-                            Debug.LogWarning($"[{nameof(RuntimePreset)}] Type {property.propertyType} is not supported (path: {property.propertyPath})");
-                            break;
-                    }
-                }
-
-                valuesJsonProperty.stringValue = JsonConvert.SerializeObject(values);
             }
         }
 
