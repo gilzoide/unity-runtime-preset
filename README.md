@@ -25,3 +25,12 @@ Functionality analogous to Unity's [Preset](https://docs.unity3d.com/ScriptRefer
 - Field types that don't work yet:
   + Gradient
   + Arrays/lists
+
+
+## How to install
+Either:
+- Install using the [Unity Package Manager](https://docs.unity3d.com/Manual/upm-ui-giturl.html) with the following URL:
+  ```
+  https://github.com/gilzoide/unity-runtime-preset.git#1.0.0-preview1
+  ```
+- Clone this repository or download a snapshot of it directly inside your project's `Assets` or `Packages` folder.
