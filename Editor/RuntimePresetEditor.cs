@@ -61,7 +61,8 @@ namespace Gilzoide.RuntimePreset.Editor
             Type targetType = runtimePreset.TargetType;
             if (targetType == null)
             {
-                EditorGUILayout.HelpBox($"Could not find target type: '{targetTypeProperty.stringValue}'", MessageType.Error);
+                EditorGUILayout.HelpBox($"Could not find target type: \"{targetTypeProperty.stringValue}\"\n\n"
+                    + "Please create the runtime preset from an existing object using the \"Create Runtime Preset\" context menu item.", MessageType.Error);
                 return;
             }
 
