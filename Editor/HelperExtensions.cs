@@ -114,7 +114,6 @@ namespace Gilzoide.RuntimePreset.Editor
 
         #region Collection Pools
 
-#if UNITY_2021_1_OR_NEWER
         public static UnityEngine.Pool.PooledObject<List<T>> GetPooledList<T>(out List<T> set)
         {
             return UnityEngine.Pool.ListPool<T>.Get(out set);
@@ -131,25 +130,6 @@ namespace Gilzoide.RuntimePreset.Editor
         {
             return UnityEngine.Pool.DictionaryPool<TKey, TValue>.Get(out dict);
         }
-#else
-        public static System.IDisposable GetPooledList<T>(out List<T> set)
-        {
-            set = new List<T>();
-            return null;
-        }
-
-        public static System.IDisposable GetPooledHashSet<T>(IEnumerable<T> elements, out HashSet<T> set)
-        {
-            set = new HashSet<T>(elements);
-            return null;
-        }
-
-        public static System.IDisposable GetPooledDictionary<TKey, TValue>(out Dictionary<TKey, TValue> dict)
-        {
-            dict = new Dictionary<TKey, TValue>();
-            return null;
-        }
-#endif
 
         #endregion
 
