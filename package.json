@@ -1,7 +1,7 @@
 {
   "name": "com.gilzoide.runtime-preset",
   "displayName": "Runtime Preset",
-  "version": "1.0.0-preview1",
+  "version": "1.0.0-preview2",
   "description": "Preset for components that can be applied at runtime",
   "homepage": "https://github.com/gilzoide/unity-runtime-preset",
   "license": "Unlicense",
