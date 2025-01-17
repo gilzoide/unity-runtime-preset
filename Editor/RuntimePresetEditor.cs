@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Presets;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
 
 namespace Gilzoide.RuntimePreset.Editor
@@ -18,7 +20,6 @@ namespace Gilzoide.RuntimePreset.Editor
         private Object _presetTemporaryObject;
         private GameObject _componentHolder;
         private Preset _preset;
-        private UnityEditor.Editor _presetEditor;
         private HashSet<string> _includedProperties;
 
         void OnEnable()
@@ -37,71 +38,60 @@ namespace Gilzoide.RuntimePreset.Editor
         void OnDisable()
         {
             DestroyImmediate(_preset);
-            DestroyImmediate(_presetEditor);
             DestroyImmediate(_componentHolder);
             DestroyImmediate(_presetTemporaryObject);
             _includedProperties = null;
         }
 
-        public override void OnInspectorGUI()
+        public override VisualElement CreateInspectorGUI()
         {
-            serializedObject.Update();
-
-            if (targetTypeProperty.hasMultipleDifferentValues)
-            {
-                using (new EditorGUI.DisabledGroupScope(true))
-                {
-                    EditorGUILayout.PropertyField(targetTypeProperty, _targetTypeContent);
-                }
-                return;
-            }
-
+            var root = new VisualElement();
 
             RuntimePreset runtimePreset = (RuntimePreset) serializedObject.targetObject;
             Type targetType = runtimePreset.TargetType;
             if (targetType == null)
             {
-                EditorGUILayout.HelpBox($"Could not find target type: \"{targetTypeProperty.stringValue}\"\n\n"
-                    + "Please create the runtime preset from an existing object using the \"Create Runtime Preset\" context menu item.", MessageType.Error);
-                return;
+                root.Add(new HelpBox($"Could not find target type: \"{targetTypeProperty.stringValue}\"\n\n"
+                    + "Please create the runtime preset from an existing object using the \"Create Runtime Preset\" context menu item.", HelpBoxMessageType.Error));
             }
+            else
+            {
+                if (_presetTemporaryObject == null && targetType.IsSubclassOf(typeof(Component)))
+                {
+                    _presetTemporaryObject = _componentHolder.AddComponent(targetType);
+                    Debug.Assert(runtimePreset.TryApplyTo(_presetTemporaryObject), "FIXME!!!");
+                }
+                if (_presetTemporaryObject == null && targetType.IsSubclassOf(typeof(ScriptableObject)))
+                {
+                    _presetTemporaryObject = CreateInstance(targetType);
+                    Debug.Assert(runtimePreset.TryApplyTo(_presetTemporaryObject), "FIXME!!!");
+                }
+                if (_preset == null)
+                {
+                    _preset = new Preset(_presetTemporaryObject);
+                    _preset.ExcludeAllPropertiesBut(EnumerateJsonKeys());
+                }
 
-            EditorGUILayout.Space();
-
-            if (_presetTemporaryObject == null && targetType.IsSubclassOf(typeof(Component)))
-            {
-                _presetTemporaryObject = _componentHolder.AddComponent(targetType);
-                Debug.Assert(runtimePreset.TryApplyTo(_presetTemporaryObject), "FIXME!!!");
+                var serializedPreset = new SerializedObject(_preset);
+                var presetInspector = new InspectorElement(serializedPreset);
+                presetInspector.TrackSerializedObjectValue(serializedPreset, _ =>
+                {
+                    _preset.GetIncludedPropertySet(_includedProperties);
+                    if (!_preset.DataEquals(_presetTemporaryObject) || !_includedProperties.SetEquals(EnumerateJsonKeys()))
+                    {
+                        Debug.Assert(_preset.ApplyTo(_presetTemporaryObject), "FIXME!!!");
+                        _preset.FillRuntimePreset(serializedObject, _presetTemporaryObject);
+                    }
+                    if (serializedObject.ApplyModifiedProperties())
+                    {
+                        runtimePreset.MarkAssetUpdated();
+                    }
+                });
+                root.Add(presetInspector);
             }
-            if (_presetTemporaryObject == null && targetType.IsSubclassOf(typeof(ScriptableObject)))
-            {
-                _presetTemporaryObject = CreateInstance(targetType);
-                Debug.Assert(runtimePreset.TryApplyTo(_presetTemporaryObject), "FIXME!!!");
-            }
-            if (_preset == null)
-            {
-                _preset = new Preset(_presetTemporaryObject);
-                _preset.ExcludeAllPropertiesBut(EnumerateJsonKeys());
-            }
-            if (_presetEditor == null)
-            {
-                _presetEditor = CreateEditor(_preset);
-            }
-
-            _presetEditor.OnInspectorGUI();
-            _preset.GetIncludedPropertySet(_includedProperties);
-            if (!_preset.DataEquals(_presetTemporaryObject) || !_includedProperties.SetEquals(EnumerateJsonKeys()))
-            {
-                Debug.Assert(_preset.ApplyTo(_presetTemporaryObject), "FIXME!!!");
-                _preset.FillRuntimePreset(serializedObject, _presetTemporaryObject);
-            }
-
-            if (serializedObject.ApplyModifiedProperties())
-            {
-                runtimePreset.MarkAssetUpdated();
-            }
+            return root;
         }
-
+    
         private IEnumerable<string> EnumerateJsonKeys()
         {
             return valuesJsonProperty.stringValue.EnumerateNestedJsonKeys();
