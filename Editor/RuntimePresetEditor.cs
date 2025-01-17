@@ -12,8 +12,6 @@ namespace Gilzoide.RuntimePreset.Editor
     [CustomEditor(typeof(RuntimePreset))]
     public class RuntimePresetEditor : UnityEditor.Editor
     {
-        private readonly GUIContent _targetTypeContent = new GUIContent("Target Type");
-
         private SerializedProperty targetTypeProperty;
         private SerializedProperty valuesJsonProperty;
 

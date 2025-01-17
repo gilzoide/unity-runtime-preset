@@ -9,12 +9,12 @@ namespace Gilzoide.RuntimePreset
 {
     public class JsonSerializeFieldContractResolver : DefaultContractResolver
     {
-        public static JsonSerializeFieldContractResolver Instance => _instance != null ? _instance : (_instance = new JsonSerializeFieldContractResolver());
+        public static JsonSerializeFieldContractResolver Instance => _instance ??= new JsonSerializeFieldContractResolver();
         private static JsonSerializeFieldContractResolver _instance;
 
         protected override List<MemberInfo> GetSerializableMembers(Type objectType)
         {
-            List<MemberInfo> members = new List<MemberInfo>();
+            List<MemberInfo> members = new();
             foreach (FieldInfo field in objectType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
             {
                 if ((field.IsPublic && field.GetCustomAttribute<NonSerializedAttribute>() == null)

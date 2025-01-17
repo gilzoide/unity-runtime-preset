@@ -24,6 +24,12 @@ namespace Gilzoide.RuntimePreset.Editor
             }
         }
 
+        [MenuItem("CONTEXT/ScriptableObject/Create Runtime Preset", isValidateFunction: true)]
+        private static bool CanCreateRuntimePreset(MenuCommand command)
+        {
+            return command.context is not RuntimePreset;
+        }
+
         private static void CreateRuntimePreset(Object obj)
         {
             string path = EditorUtility.SaveFilePanelInProject("Create Runtime Preset", obj.GetType().Name + "_preset", "asset", "");

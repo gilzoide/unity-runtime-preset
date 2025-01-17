@@ -11,7 +11,7 @@ namespace Gilzoide.RuntimePreset
     {
         [SerializeField] internal string _targetType = "";
         [SerializeField] internal string _valuesJson = "{}";
-        [SerializeField] internal List<Object> _objectReferences = new List<Object>();
+        [SerializeField] internal List<Object> _objectReferences = new();
         
         private JsonSerializerSettings _jsonSettings;
 
